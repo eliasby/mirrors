@@ -1,0 +1,6 @@
+{
+	"primary": "https://github.com/anass-b/gitopus.git",
+	"mirrors": [
+		"https://anassb@bitbucket.org/anassb/gitopus.git"
+	]
+}
