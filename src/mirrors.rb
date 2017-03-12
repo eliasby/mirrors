@@ -2,7 +2,7 @@ require 'json'
 
 class Program
     def self.run
-        file = File.read('remotes.json')
+        file = File.read('mirrors.json')
         json = JSON.parse(file)
         
         primary = json['primary']

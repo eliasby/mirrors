@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+require '/usr/src/app/src/mirrors.rb'
+Program.run
