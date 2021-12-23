@@ -1,4 +1,4 @@
-# mirrors
+# Mirrors
 
 Easily add multiple remotes to Git repositories
 
