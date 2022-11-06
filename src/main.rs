@@ -1,42 +1,80 @@
+mod config;
+mod constants;
+mod error;
+
 use colored::*;
-use serde_json::Value;
-use std::fs;
+use std::process;
 use std::process::Command;
 
 fn main() {
-    let file = fs::read_to_string("./mirrors.json");
-    let json: Value = serde_json::from_str(&file.unwrap()).unwrap();
+    let config = config::read_config_or_fail();
 
-    Command::new("git").arg("remote").arg("rm").arg("origin");
-    println!("Removed origin.");
-
-    let primary = json["primary"].as_str().unwrap();
-    Command::new("git")
-        .arg("remote")
-        .arg("add")
-        .arg("origin")
-        .arg(primary);
-    println!("Added primary 🔗 {}", primary.cyan());
-    Command::new("git")
-        .arg("remote")
-        .arg("set-url")
-        .arg("--add")
-        .arg("--push")
-        .arg("origin")
-        .arg(primary);
-
-    let mirrors = json["mirrors"].as_array().unwrap();
-    for mirror in mirrors.iter() {
-        let value = mirror.as_str().unwrap();
-        Command::new("git")
-            .arg("remote")
-            .arg("set-url")
-            .arg("--add")
-            .arg("--push")
-            .arg("origin")
-            .arg(value);
-        println!("Added mirror  🔗 {}", value.magenta());
+    match Command::new("git")
+        .args(["remote", "rm", "origin"])
+        .output()
+    {
+        Ok(_) => {}
+        Err(e) => {
+            error::print(format!("Failed to remove origin."));
+            error::print(format!("{}", e));
+            process::exit(1);
+        }
     }
 
-    println!("Success! 🎉")
+    match Command::new("git")
+        .args(["remote", "add", "origin", &config.primary])
+        .output()
+    {
+        Ok(_) => {}
+        Err(e) => {
+            error::print(format!("Failed to add primary {}.", &config.primary));
+            error::print(format!("{}", e));
+            process::exit(1);
+        }
+    }
+    match Command::new("git")
+        .args([
+            "remote",
+            "set-url",
+            "--add",
+            "--push",
+            "origin",
+            &config.primary,
+        ])
+        .output()
+    {
+        Ok(_) => {}
+        Err(e) => {
+            error::print(format!("Failed to add primary {}.", &config.primary));
+            error::print(format!("{}", e));
+            process::exit(1);
+        }
+    }
+    println!("🔗 Added primary {}", &config.primary.cyan());
+
+    for mirror in config.mirrors.iter() {
+        match Command::new("git")
+            .args(["remote", "set-url", "--add", "--push", "origin", mirror])
+            .output()
+        {
+            Ok(_) => println!("🔗 Added mirror  {}", mirror.magenta()),
+            Err(e) => {
+                error::print(format!("Failed to add mirror {}.", mirror));
+                error::print(format!("{}", e));
+            }
+        }
+    }
+
+    match Command::new("git").args(["remote", "-v"]).output() {
+        Ok(output) => {
+            println!("\n📄 Summary ");
+            println!("{}", String::from_utf8(output.stdout).unwrap());
+        }
+        Err(e) => {
+            error::print(format!("Failed to print summary."));
+            error::print(format!("{}", e));
+            process::exit(1);
+        }
+    }
+    println!("🎉 {}", "Success!".bold());
 }
