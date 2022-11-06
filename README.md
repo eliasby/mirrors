@@ -26,3 +26,7 @@ Create `mirrors.json` in repository root:
 ```
 
 `primary` will be push+fetch, `mirrors` will be fetch only.
+
+## Licensing
+
+Mirrors is released under the [MIT License](LICENSE).
