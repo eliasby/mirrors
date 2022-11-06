@@ -4,6 +4,8 @@ Easily add multiple remotes to Git repositories.
 
 ### Build
 
+Install Rust: https://www.rust-lang.org/learn/get-started
+
 ```sh
 cargo build --release
 export PATH="$PATH:./target/release"
